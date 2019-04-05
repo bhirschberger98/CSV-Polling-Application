@@ -11,8 +11,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -21,6 +26,10 @@ public class Controller {
 	private final static String[] prefixes = extractPrefixFromFile();
 	private final static String[] suffixes = extractSufixFromFile();
 	
+	
+    @FXML
+    private Rectangle dropArea;
+    
 	private File file;
 	
 	private TableView<Candidate> table;
@@ -38,8 +47,30 @@ public class Controller {
 		tallyNames(file);
 	}
     
-	
-	//courtesy of bucky roberts
+    @FXML
+    private void handleDragOver(DragEvent event) {
+    	if(event.getDragboard().hasFiles()) {
+    		event.acceptTransferModes(TransferMode.ANY);
+    		dropArea.setFill(Color.LAWNGREEN);
+    	}
+    	else {
+    		dropArea.setFill(Color.RED);
+    	}
+    }
+    
+    @FXML
+    private void getDroppedFiles(DragEvent event) {
+    	file=event.getDragboard().getFiles().get(0);
+    	tallyNames(file);
+    	dropArea.setFill(Paint.valueOf("#ebeced"));
+    }
+    
+    @FXML
+    private void resetColor() {
+    	dropArea.setFill(Paint.valueOf("#ebeced"));
+    }
+    
+    
 	public void  displayResults(ArrayList<Candidate> candidates) throws Exception {
 		Stage window = new Stage();
         window.setTitle("Results");
@@ -166,7 +197,6 @@ public class Controller {
 		try {
 			displayResults(candidates);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -194,7 +224,7 @@ public class Controller {
 	public void displayAbout() {
 		Stage primaryStage=new Stage();
 		StackPane layout =new StackPane();
-		layout.getChildren().add(new Text(150,100,"Made by Brett Hirschberger and Ivan."));
+		layout.getChildren().add(new Text(150,100,"Made by Brett Hirschberger and Ivan Williams."));
 		Scene scene = new Scene(layout,300,200);
         primaryStage.setTitle("About");
         primaryStage.setScene(scene);
@@ -214,6 +244,7 @@ public class Controller {
 			}
 		}
 	}
+	
 	
 	private static String[] extractPrefixFromFile() {
 		//retrieves the prefixes from the file that holds all of the prefixes, this helps for if we miss any possible prefixes that the user can add to the file
