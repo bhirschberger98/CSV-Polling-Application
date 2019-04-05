@@ -23,17 +23,16 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class Controller {
-	private final static String[] prefixes = extractPrefixFromFile();
-	private final static String[] suffixes = extractSufixFromFile();
+	private final static String[] prefixes = extractPrefixFromFile();	
+	private final static String[] suffixes = extractSufixFromFile();	
 	
+	private File file;	
 	
-    @FXML
-    private Rectangle dropArea;
+	private TableView<Candidate> table;	
     
-	private File file;
-	
-	private TableView<Candidate> table;
-	
+	@FXML
+    private Rectangle dropArea;
+    	
     @FXML
 	public void selectFile(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
