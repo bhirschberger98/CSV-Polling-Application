@@ -3,10 +3,17 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.text.TextFlow;
+import javafx.scene.Scene;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -16,24 +23,64 @@ public class Controller {
 	
 	private File file;
 	
-    @FXML
-    private TextArea textField;
-
+	private TableView<Candidate> table;
+	
     @FXML
 	public void selectFile(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().addAll(
+        		new FileChooser.ExtensionFilter("All Files", "*.*"),
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"),
+                new FileChooser.ExtensionFilter("CSV", "*.csv")
+            );
 		file=new File(fileChooser.showOpenDialog(null).getAbsolutePath());
 		tallyNames(file);
 	}
     
-	public void tallyNames(File file) {
+	
+	//courtesy of bucky roberts
+	public void  displayResults(ArrayList<Candidate> candidates) throws Exception {
+		Stage window = new Stage();
+        window.setTitle("Results");
+
+        //Name column
+        TableColumn<Candidate, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setMinWidth(200);
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        //Votes column
+        TableColumn<Candidate, Integer> votesColumn = new TableColumn<>("Votes");
+        votesColumn.setMinWidth(100);
+        votesColumn.setCellValueFactory(new PropertyValueFactory<>("Votes"));
+
+
+        table = new TableView<>();
+        table.setItems(getCandidates(candidates));
+        table.getColumns().addAll(nameColumn, votesColumn);
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(table);
+
+        Scene scene = new Scene(vBox);
+        window.setScene(scene);
+        window.show();
+	}
+	 public ObservableList<Candidate> getCandidates(ArrayList<Candidate> candidates){
+		 ObservableList<Candidate> observableListCandidates = FXCollections.observableArrayList();
+		 for(Candidate c: candidates) {
+			 observableListCandidates.add(c);
+		 }
+		 return observableListCandidates;
+	        
+	 }
+	 public void tallyNames(File file) {
 			//file object retrieves the file
 			ArrayList<Candidate> candidates=new ArrayList<>(); //an arraylist for holding all of the candidate objects
 			Scanner sc;
 			try {
-				sc = new Scanner(file);
-			  //for reading the file
+			sc = new Scanner(file);
+			//for reading the file
 			sc.useDelimiter(","); //sets the delimiter to a comma
 			while(sc.hasNextLine()) { //loops once per line
 				String line = sc.nextLine(); //retrieves a line from the file
@@ -55,12 +102,10 @@ public class Controller {
 					}
 					if(abundant == false){ //runs if abundant is false
 						candidates.add(new Candidate(name)); //adds a new candidate object
-						//break;
 					}
 				}
 
 			}
-			System.out.println(candidates); //outputs the arraylist
 			sc.close(); //closes the scanner
 			boolean noMatches = false; //a boolean variable to check if there's anymore matches
 			do {
@@ -117,13 +162,14 @@ public class Controller {
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		printResults(candidates);
+			
+		try {
+			displayResults(candidates);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
-	
-	public void printResults(ArrayList<Candidate> candidates) {
-		textField.setText(candidates.toString());
-	}
-	
 	public  boolean isInitials(final Candidate c1, String s) {
 		if(c1.getName().contains(s) && !(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2))
 			return true;
@@ -145,8 +191,16 @@ public class Controller {
 		}
 		return name.trim();
 	}
-	
-	public  void compareNames(ArrayList<Candidate> candidates) {
+	public void displayAbout() {
+		Stage primaryStage=new Stage();
+		StackPane layout =new StackPane();
+		layout.getChildren().add(new Text(150,100,"Made by Brett Hirschberger and Ivan."));
+		Scene scene = new Scene(layout,300,200);
+        primaryStage.setTitle("About");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+	}
+	public void compareNames(ArrayList<Candidate> candidates) {
 		for(int i=0;i<candidates.size();i++) {
 			String[] s1=candidates.get(i).getName().split(" ");
 			for(Candidate c2: candidates){
