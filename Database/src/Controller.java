@@ -59,8 +59,9 @@ public class Controller {
     
     @FXML
     private void getDroppedFiles(DragEvent event) {
-    	file=event.getDragboard().getFiles().get(0);
-    	tallyNames(file);
+    	for(File file:event.getDragboard().getFiles()) {
+    		tallyNames(file);
+    	}
     	dropArea.setFill(Paint.valueOf("#ebeced"));
     }
     
