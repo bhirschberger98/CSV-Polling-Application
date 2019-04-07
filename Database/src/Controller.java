@@ -71,6 +71,7 @@ public class Controller {
     }
     
     
+
 	public void  displayResults(ArrayList<Candidate> candidates) throws Exception {
 		Stage window = new Stage();
         window.setTitle("Results");
@@ -208,15 +209,27 @@ public class Controller {
 	
 	public  String trimSufixAndPrefix(String name) {
 		//checks if theres any prefixes or suffixes and removes them and any extra white spaces
-		for(String s: prefixes){
-			if(name.substring(0, name.indexOf(" ")).equalsIgnoreCase(s)){
-				name = name.replaceAll(name.substring(0, name.indexOf(" ")), "");
+		if(name.substring(0, name.indexOf(" ")).length()>=3&&name.substring(0, name.indexOf(" ")).contains(".")){
+			name = name.replaceAll(name.substring(0, name.indexOf(" ")), "");
+		}
+		else {
+			for(String s: prefixes){
+				if(name.substring(0, name.indexOf(" ")).equalsIgnoreCase(s)){
+					name = name.replaceAll(name.substring(0, name.indexOf(" ")), "");
+				}
 			}
 		}
-		for(String s: suffixes){
-			if(name.substring(name.lastIndexOf(" ") + 1, name.length()).equalsIgnoreCase(s)){
-				name = name.replaceAll(name.substring(name.lastIndexOf(" ") + 1, name.length()), "");
-				return name.trim();
+		
+		if(name.substring(name.lastIndexOf(" ") + 1, name.length()).contains(".")&&name.substring(0, name.indexOf(" ")).length()>=3){
+			name = name.replaceAll(name.substring(name.lastIndexOf(" ") + 1, name.length()), "");
+			return name.trim();
+		}
+		else {
+			for(String s: suffixes){
+				if(name.substring(name.lastIndexOf(" ") + 1, name.length()).equalsIgnoreCase(s)){
+					name = name.replaceAll(name.substring(name.lastIndexOf(" ") + 1, name.length()), "");
+					return name.trim();
+				}
 			}
 		}
 		return name.trim();
