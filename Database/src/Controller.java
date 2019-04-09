@@ -72,9 +72,9 @@ public class Controller {
     
     
 
-	public void  displayResults(ArrayList<Candidate> candidates) throws Exception {
+	public void  displayResults(ArrayList<Candidate> candidates, String fileName) throws Exception {
 		Stage window = new Stage();
-        window.setTitle("Results");
+        window.setTitle("Results for "+fileName);
 
         //Name column
         TableColumn<Candidate, String> nameColumn = new TableColumn<>("Name");
@@ -125,7 +125,7 @@ public class Controller {
 					}
 					if(name.contains(" ")){
 						for(Candidate c: candidates){ //an enhanced for loop that declares a variable to access a specific element in the arraylist
-							if(c.getName().contains(name.substring(0, name.indexOf(" "))) && c.getName().contains(name.substring(name.indexOf(" ") + 1, name.length()))){ //runs if the first initials and the last names matches
+							if(c.getName().toUpperCase().contains(name.substring(0, name.indexOf(" ")).toUpperCase()) && c.getName().contains(name.substring(name.indexOf(" ") + 1, name.length()))){ //runs if the first initials and the last names matches
 								abundant = true; //sets abundant to true
 								c.incrementVotes(); //adds 1 votes variable of the candidate object
 								break; //breaks the loop
@@ -150,7 +150,7 @@ public class Controller {
 					if(c1.getName().contains(" ")){
 						if(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2){ //checks if there's an initial in the name
 							for(Candidate c2: candidates){
-								if(!c1.getName().equals(c2.getName()) && isInitials(c2, " ")){ //checks if both names aren't the same and if there's an initial
+								if(!c1.getName().equalsIgnoreCase(c2.getName()) && isInitials(c2, " ")){ //checks if both names aren't the same and if there's an initial
 									if(compareNames(c1, c2)){ //compares both objects based on their names
 										abundant = true;
 										possibilities++; //adds 1 to the possibilities variable
@@ -162,17 +162,18 @@ public class Controller {
 					}
 					else {
 						for(Candidate c2: candidates){
-							if(!c1.getName().equals(c2.getName()) && !isInitials(c2,".")){
+							if(!c1.getName().equalsIgnoreCase(c2.getName()) && !isInitials(c2,".")){
 								if(c1.getName().contains(".")){ //checks if there's a period
-									if(c2.getName().contains(" ") && c1.getName().substring(0, 1).equals(c2.getName().substring(0, 1)) &&
-											c1.getName().substring(c1.getName().indexOf(".") + 1, c1.getName().indexOf(".") + 2).equals(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2))){ //checks if there's any initials
+									if(c2.getName().contains(" ") && c1.getName().substring(0, 1).equalsIgnoreCase(c2.getName().substring(0, 1)) &&
+											c1.getName().substring(c1.getName().indexOf(".") + 1, c1.getName().indexOf(".") + 2).equalsIgnoreCase(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2))){ //checks if there's any initials
 										abundant = true;
 										possibilities++;
 										candidate = c2;
 									}
 								}
 								else{
-									if(c2.getName().contains(c1.getName())){ //checks if the c2 object's name contains the c1 object's name in it
+									if(c2.getName().substring(0,c2.getName().indexOf(' ')).toUpperCase().contains(c1.getName().substring(0,c1.getName().indexOf(' ')).toUpperCase())&&
+											c2.getName().substring(c2.getName().lastIndexOf(' '),c2.getName().length()-1).toUpperCase().contains(c1.getName().substring(c1.getName().lastIndexOf(' '),c1.getName().length()-1).toUpperCase())){ //checks if the c2 object's name contains the c1 object's name in it
 										abundant = true;
 										possibilities++;
 										candidate = c2;
@@ -196,20 +197,21 @@ public class Controller {
 		}
 			
 		try {
-			displayResults(candidates);
+			displayResults(candidates,file.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	public  boolean isInitials(final Candidate c1, String s) {
+
+	public boolean isInitials(final Candidate c1, String s) {
 		if(c1.getName().contains(s) && !(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2))
 			return true;
 		return false;
 	}
 	
-	public  String trimSufixAndPrefix(String name) {
-		//checks if theres any prefixes or suffixes and removes them and any extra white spaces
-		if(name.substring(0, name.indexOf(" ")).length()>=3&&name.substring(0, name.indexOf(" ")).contains(".")){
+	public String trimSufixAndPrefix(String name) {
+		//checks if there is any prefixes or suffixes and removes them and any extra white spaces
+		if(name.substring(0, name.indexOf(" ")).length()<=4&&name.substring(0, name.indexOf(" ")).contains(".")){
 			name = name.replaceAll(name.substring(0, name.indexOf(" ")), "");
 		}
 		else {
@@ -220,7 +222,7 @@ public class Controller {
 			}
 		}
 		
-		if(name.substring(name.lastIndexOf(" ") + 1, name.length()).contains(".")&&name.substring(0, name.indexOf(" ")).length()>=3){
+		if(name.substring(name.lastIndexOf(" ") + 1, name.length()).contains(".")&&name.substring(0, name.indexOf(" ")).length()<=3){
 			name = name.replaceAll(name.substring(name.lastIndexOf(" ") + 1, name.length()), "");
 			return name.trim();
 		}
@@ -301,10 +303,10 @@ public class Controller {
 	}
 	
 	public boolean compareNames(final Candidate c1, final Candidate c2) {
-		if((c2.getName().contains(c1.getName().substring(c1.getName().indexOf(" ") + 1, c1.getName().length())) &&
-			c1.getName().substring(0, 1).equals(c2.getName().substring(0, 1))) ||
+		if(c2.getName().contains(c1.getName().substring(c1.getName().indexOf(" ") + 1, c1.getName().length())) &&
+			c1.getName().substring(0, 1).equalsIgnoreCase((c2.getName().substring(0, 1))) ||
 			(c2.getName().contains(c1.getName().substring(0, c1.getName().indexOf(" "))) &&
-			c1.getName().substring(c1.getName().indexOf(" ") + 1, c1.getName().indexOf(" ") + 2).equals(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2)))){ //performs comparisons to check if there's similarities between the 2 names based on first and last initials and/or first and last names
+			c1.getName().substring(c1.getName().indexOf(" ") + 1, c1.getName().indexOf(" ") + 2).equalsIgnoreCase(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2)))){ //performs comparisons to check if there's similarities between the 2 names based on first and last initials and/or first and last names
 			return true;
 		}
 		return false;
