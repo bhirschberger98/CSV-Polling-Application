@@ -116,8 +116,9 @@ public class Controller {
 			sc.useDelimiter(","); //sets the delimiter to a comma
 			while(sc.hasNextLine()) { //loops once per line
 				String line = sc.nextLine(); //retrieves a line from the file
-				String[] names = line.split(","); //splits the string based on the comma
-				for(int i = 0; i < names.length; i++) { //runs at the same amount as the length of the string array
+				String[] names = line.split(",");//splits the string based on the comma
+				String committee=names[0];
+				for(int i = 1; i < names.length; i++) { //runs at the same amount as the length of the string array
 					
 					boolean abundant = false; //a boolean variable for checking if there's a match
 					String name = names[i].replaceAll("﻿", "").trim(); //a specific element from the array that removes the utf-8 characters and any extra white spaces
@@ -125,16 +126,17 @@ public class Controller {
 						name=trimSufixAndPrefix(name); //removes the suffix and/or prefix
 					}
 					if(name.contains(" ")){
-						for(Candidate c: candidates){ //an enhanced for loop that declares a variable to access a specific element in the arraylist
-							if(c.getName().toUpperCase().contains(name.substring(0, name.indexOf(" ")).toUpperCase()) ){ //runs if the first initials and the last names matches
+						for(Candidate c1: candidates){ //an enhanced for loop that declares a variable to access a specific element in the arraylist
+							Candidate c2=new Candidate(name, committee);
+							if(c1.getName().toUpperCase().contains(name.substring(0, name.indexOf(" ")).toUpperCase())&&(c1.getCommittee().equals(c2.getCommittee()))){ //runs if the first initials and the last names matches
 								abundant = true; //sets abundant to true
-								c.incrementVotes(); //adds 1 votes variable of the candidate object
+								c1.incrementVotes(); //adds 1 votes variable of the candidate object
 								break; //breaks the loop
 							}
 						}
 					}
 					if(abundant == false){ //runs if abundant is false
-						candidates.add(new Candidate(name)); //adds a new candidate object
+						candidates.add(new Candidate(name,committee)); //adds a new candidate object
 					}
 				}
 
@@ -147,12 +149,12 @@ public class Controller {
 				for(int i = 0; i < candidates.size(); i++){ //runs at the same amount as the size of the arraylist
 					boolean abundant = false;
 					int possibilities = 0; //an int variable to record the number of possible matches
-					Candidate c1 = candidates.get(i), candidate = new Candidate(""); //2 candidate objects
+					Candidate c1 = candidates.get(i), candidate = new Candidate("",""); //2 candidate objects
 
 					if(c1.getName().contains(" ")){
 						if(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2){ //checks if there's an initial in the name
 							for(Candidate c2: candidates){
-								if(!c1.getName().equalsIgnoreCase(c2.getName()) && isInitials(c2, " ")){ //checks if both names aren't the same and if there's an initial
+								if(!c1.getName().equalsIgnoreCase(c2.getName()) && isInitials(c2, " ")&&(c1.getCommittee().equals(c2.getCommittee()))){ //checks if both names aren't the same and if there's an initial
 									if(compareNames(c1, c2)){ //compares both objects based on their names
 										abundant = true;
 										possibilities++; //adds 1 to the possibilities variable
@@ -166,8 +168,8 @@ public class Controller {
 						for(Candidate c2: candidates){
 							if(!c1.getName().equalsIgnoreCase(c2.getName()) && !isInitials(c2,".")){
 								if(c1.getName().contains(".")){ //checks if there's a period
-									if(c2.getName().contains(" ") && c1.getName().substring(0, 1).equalsIgnoreCase(c2.getName().substring(0, 1)) &&
-											c1.getName().substring(c1.getName().indexOf(".") + 1, c1.getName().indexOf(".") + 2).equalsIgnoreCase(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2))){ //checks if there's any initials
+									if(c2.getName().contains(" ") && c1.getName().substring(0, 1).equalsIgnoreCase(c2.getName().substring(0, 1)) &&(c1.getCommittee().equals(c2.getCommittee())&&
+											c1.getName().substring(c1.getName().indexOf(".") + 1, c1.getName().indexOf(".") + 2).equalsIgnoreCase(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2)))){ //checks if there's any initials
 										abundant = true;
 										possibilities++;
 										candidate = c2;
@@ -175,7 +177,7 @@ public class Controller {
 								}
 								else{
 									if(c2.getName().substring(0,c2.getName().indexOf(' ')).toUpperCase().contains(c1.getName().substring(0,c1.getName().indexOf(' ')).toUpperCase())&&
-											c2.getName().substring(c2.getName().lastIndexOf(' '),c2.getName().length()-1).toUpperCase().contains(c1.getName().substring(c1.getName().lastIndexOf(' '),c1.getName().length()-1).toUpperCase())){ //checks if the c2 object's name contains the c1 object's name in it
+											c2.getName().substring(c2.getName().lastIndexOf(' '),c2.getName().length()-1).toUpperCase().contains(c1.getName().substring(c1.getName().lastIndexOf(' '),c1.getName().length()-1).toUpperCase())&&c1.getCommittee().equals(c2.getCommittee())){ //checks if the c2 object's name contains the c1 object's name in it
 										abundant = true;
 										possibilities++;
 										candidate = c2;
@@ -250,9 +252,10 @@ public class Controller {
 	public void compareNames(ArrayList<Candidate> candidates) {
 		for(int i=0;i<candidates.size();i++) {
 			String[] s1=candidates.get(i).getName().split(" ");
+			Candidate c1=candidates.get(i);
 			for(Candidate c2: candidates){
 				String[] s2=c2.getName().split(" ");
-				if((s1[0].contains(s2[0])||s2[0].contains(s1[0]))&&!s1[0].equalsIgnoreCase(s2[0])) {
+				if((s1[0].contains(s2[0])||s2[0].contains(s1[0]))&&!s1[0].equalsIgnoreCase(s2[0])&&(c1.getCommittee().equals(c2.getCommittee()))) {
 					candidates.get(i).addVotes(c2.getVotes()); //adds votes from the c1 object to the candidate object's vote variable
 					candidates.remove(c2);
 					i--;

@@ -2,7 +2,7 @@ public class Candidate {
 	private int votes;
 	private String name;
 	private String committee;
-	Candidate(String name){
+	Candidate(String name, String committee){
 		this.name=name;
 		this.committee=committee;
 		this.votes=1;
