@@ -118,6 +118,7 @@ public class Controller {
 				String line = sc.nextLine(); //retrieves a line from the file
 				String[] names = line.split(","); //splits the string based on the comma
 				for(int i = 0; i < names.length; i++) { //runs at the same amount as the length of the string array
+					
 					boolean abundant = false; //a boolean variable for checking if there's a match
 					String name = names[i].replaceAll("﻿", "").trim(); //a specific element from the array that removes the utf-8 characters and any extra white spaces
 					if(name.contains(" ")){ //runs if there's a space in the name
@@ -125,7 +126,7 @@ public class Controller {
 					}
 					if(name.contains(" ")){
 						for(Candidate c: candidates){ //an enhanced for loop that declares a variable to access a specific element in the arraylist
-							if(c.getName().toUpperCase().contains(name.substring(0, name.indexOf(" ")).toUpperCase()) && c.getName().contains(name.substring(name.indexOf(" ") + 1, name.length()))){ //runs if the first initials and the last names matches
+							if(c.getName().toUpperCase().contains(name.substring(0, name.indexOf(" ")).toUpperCase()) ){ //runs if the first initials and the last names matches
 								abundant = true; //sets abundant to true
 								c.incrementVotes(); //adds 1 votes variable of the candidate object
 								break; //breaks the loop
@@ -141,6 +142,7 @@ public class Controller {
 			sc.close(); //closes the scanner
 			boolean noMatches = false; //a boolean variable to check if there's anymore matches
 			do {
+				
 				noMatches = true; //sets the variable to true
 				for(int i = 0; i < candidates.size(); i++){ //runs at the same amount as the size of the arraylist
 					boolean abundant = false;
@@ -222,7 +224,7 @@ public class Controller {
 			}
 		}
 		
-		if(name.substring(name.lastIndexOf(" ") + 1, name.length()).contains(".")&&name.substring(0, name.indexOf(" ")).length()<=3){
+		if(name.substring(name.lastIndexOf(" ") + 1, name.length()).contains(".")&&name.substring(0, name.indexOf(" ")).trim().length()<=4){
 			name = name.replaceAll(name.substring(name.lastIndexOf(" ") + 1, name.length()), "");
 			return name.trim();
 		}

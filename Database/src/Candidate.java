@@ -1,8 +1,10 @@
 public class Candidate {
 	private int votes;
 	private String name;
+	private String committee;
 	Candidate(String name){
 		this.name=name;
+		this.committee=committee;
 		this.votes=1;
 	}
 	public void incrementVotes() {
@@ -10,6 +12,9 @@ public class Candidate {
 	}
 	public String getName() {
 		return this.name;
+	}
+	public String getCommittee() {
+		return this.committee;
 	}
 	public int getVotes() {
 		return this.votes;
@@ -19,9 +24,9 @@ public class Candidate {
 	}
 	public String toString() {
 		if(votes==1) {
-			return this.name+" has "+this.votes+" vote.\n";
+			return this.name+" is in the "+this.committee+" committee and has "+this.votes+" vote.\n";
 		}else {
-			return this.name+" has "+this.votes+" votes.\n";
+			return this.name+" is in the "+this.committee+" committee and has "+this.votes+" votes.\n";
 		}
 	}
 }
