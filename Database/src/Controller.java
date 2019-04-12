@@ -8,6 +8,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -25,11 +27,7 @@ import javafx.stage.Stage;
 public class Controller {
 	private final static String[] prefixes = extractPrefixFromFile();	
 	private final static String[] suffixes = extractSufixFromFile();	
-	
-	private File file;	
-	
-	private TableView<Candidate> table;	
-    
+		
 	@FXML
     private Rectangle dropArea;
     	
@@ -42,7 +40,7 @@ public class Controller {
                 new FileChooser.ExtensionFilter("Text Files", "*.txt"),
                 new FileChooser.ExtensionFilter("CSV", "*.csv")
             );
-		file=new File(fileChooser.showOpenDialog(null).getAbsolutePath());
+		File file=new File(fileChooser.showOpenDialog(null).getAbsolutePath());
 		tallyNames(file);
 	}
     
@@ -72,27 +70,42 @@ public class Controller {
     
     
 
-	public void  displayResults(ArrayList<Candidate> candidates, String fileName) throws Exception {
+	public void displayResults(ArrayList<Candidate> candidates,ArrayList<String> committees, String fileName) throws Exception {
 		Stage window = new Stage();
         window.setTitle("Results for "+fileName);
-
-        //Name column
-        TableColumn<Candidate, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setMinWidth(200);
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        //Votes column
-        TableColumn<Candidate, Integer> votesColumn = new TableColumn<>("Votes");
-        votesColumn.setMinWidth(100);
-        votesColumn.setCellValueFactory(new PropertyValueFactory<>("Votes"));
-
-
-        table = new TableView<>();
-        table.setItems(getCandidates(candidates));
-        table.getColumns().addAll(nameColumn, votesColumn);
-
+        //Tab tab = new Tab();
+        TabPane tabPane = new TabPane();
+        for(int i=0;i<committees.size();i++) {
+        	Tab tab = new Tab();
+        	TableView<Candidate> table=new TableView<>();
+        	tab.setText(committees.get(i));
+        	tab.setClosable(false);
+        	ObservableList<Candidate> data= FXCollections.observableArrayList();
+        	
+	        TableColumn<Candidate, String> nameColumn = new TableColumn<>("Name");
+	        nameColumn.setMinWidth(200);
+	        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+	            
+	        TableColumn<Candidate, Integer> votesColumn = new TableColumn<>("Votes");
+	        votesColumn.setMinWidth(100);
+	        votesColumn.setCellValueFactory(new PropertyValueFactory<>("Votes"));
+            
+	        //selects the candidates appropreate committee
+            for(Candidate candidate:candidates) {
+            	if(candidate.getCommittee().equals(committees.get(i))) {
+            		data.add(candidate);
+            	}
+            }            
+            
+            table = new TableView<>();
+            table.setItems(data);
+            table.getColumns().addAll(nameColumn,votesColumn);
+        	tab.setContent(table);
+        	
+        	tabPane.getTabs().add(tab);
+        }
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(table);
+        vBox.getChildren().addAll(tabPane);
 
         Scene scene = new Scene(vBox);
         window.setScene(scene);
@@ -108,7 +121,9 @@ public class Controller {
 	 }
 	 public void tallyNames(File file) {
 			//file object retrieves the file
-			ArrayList<Candidate> candidates=new ArrayList<>(); //an arraylist for holding all of the candidate objects
+			ArrayList<Candidate> candidates=new ArrayList<>();
+			ArrayList<String> committees=new ArrayList<>();//an arraylist for holding all of the candidate objects
+			//String[] committee
 			Scanner sc;
 			try {
 			sc = new Scanner(file);
@@ -118,6 +133,7 @@ public class Controller {
 				String line = sc.nextLine(); //retrieves a line from the file
 				String[] names = line.split(",");//splits the string based on the comma
 				String committee=names[0];
+				committees.add(names[0]);
 				for(int i = 1; i < names.length; i++) { //runs at the same amount as the length of the string array
 					
 					boolean abundant = false; //a boolean variable for checking if there's a match
@@ -130,7 +146,7 @@ public class Controller {
 							Candidate c2=new Candidate(name, committee);
 							if(c1.getName().toUpperCase().contains(name.substring(0, name.indexOf(" ")).toUpperCase())&&(c1.getCommittee().equals(c2.getCommittee()))){ //runs if the first initials and the last names matches
 								abundant = true; //sets abundant to true
-								c1.incrementVotes(); //adds 1 votes variable of the candidate object
+								c1.incrementVotes();//adds 1 votes variable of the candidate object
 								break; //breaks the loop
 							}
 						}
@@ -159,6 +175,7 @@ public class Controller {
 										abundant = true;
 										possibilities++; //adds 1 to the possibilities variable
 										candidate = c2; //sets the candidate object to the c2 object
+
 									}
 								}
 							}
@@ -184,6 +201,7 @@ public class Controller {
 									}
 								}
 							}
+							
 						}
 					}
 					if(abundant == true && possibilities == 1){ //runs if abundant is set to true and possibilities is set to 1
@@ -201,7 +219,7 @@ public class Controller {
 		}
 			
 		try {
-			displayResults(candidates,file.getName());
+			displayResults(candidates,committees,file.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
