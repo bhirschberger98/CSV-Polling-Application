@@ -90,7 +90,7 @@ public class Controller {
 	        votesColumn.setMinWidth(100);
 	        votesColumn.setCellValueFactory(new PropertyValueFactory<>("Votes"));
             
-	        //selects the candidates appropreate committee
+	        //selects the candidates from the appropreate committee and adds them to the table
             for(Candidate candidate:candidates) {
             	if(candidate.getCommittee().equals(committees.get(i))) {
             		data.add(candidate);
@@ -105,8 +105,7 @@ public class Controller {
         	tabPane.getTabs().add(tab);
         }
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(tabPane);
-
+        vBox.getChildren().addAll(tabPane);        
         Scene scene = new Scene(vBox);
         window.setScene(scene);
         window.show();
@@ -138,6 +137,9 @@ public class Controller {
 					
 					boolean abundant = false; //a boolean variable for checking if there's a match
 					String name = names[i].replaceAll("﻿", "").trim(); //a specific element from the array that removes the utf-8 characters and any extra white spaces
+					if(name.equals("")) {//eliminates any invalid names
+						continue;
+					}
 					if(name.contains(" ")){ //runs if there's a space in the name
 						name=trimSufixAndPrefix(name); //removes the suffix and/or prefix
 					}
@@ -158,59 +160,7 @@ public class Controller {
 
 			}
 			sc.close(); //closes the scanner
-			boolean noMatches = false; //a boolean variable to check if there's anymore matches
-			do {
-				
-				noMatches = true; //sets the variable to true
-				for(int i = 0; i < candidates.size(); i++){ //runs at the same amount as the size of the arraylist
-					boolean abundant = false;
-					int possibilities = 0; //an int variable to record the number of possible matches
-					Candidate c1 = candidates.get(i), candidate = new Candidate("",""); //2 candidate objects
-
-					if(c1.getName().contains(" ")){
-						if(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2){ //checks if there's an initial in the name
-							for(Candidate c2: candidates){
-								if(!c1.getName().equalsIgnoreCase(c2.getName()) && isInitials(c2, " ")&&(c1.getCommittee().equals(c2.getCommittee()))){ //checks if both names aren't the same and if there's an initial
-									if(compareNames(c1, c2)){ //compares both objects based on their names
-										abundant = true;
-										possibilities++; //adds 1 to the possibilities variable
-										candidate = c2; //sets the candidate object to the c2 object
-
-									}
-								}
-							}
-						}
-					}
-					else {
-						for(Candidate c2: candidates){
-							if(!c1.getName().equalsIgnoreCase(c2.getName()) && !isInitials(c2,".")){
-								if(c1.getName().contains(".")){ //checks if there's a period
-									if(c2.getName().contains(" ") && c1.getName().substring(0, 1).equalsIgnoreCase(c2.getName().substring(0, 1)) &&(c1.getCommittee().equals(c2.getCommittee())&&
-											c1.getName().substring(c1.getName().indexOf(".") + 1, c1.getName().indexOf(".") + 2).equalsIgnoreCase(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2)))){ //checks if there's any initials
-										abundant = true;
-										possibilities++;
-										candidate = c2;
-									}
-								}
-								else{
-									if(c2.getName().substring(0,c2.getName().indexOf(' ')).toUpperCase().contains(c1.getName().substring(0,c1.getName().indexOf(' ')).toUpperCase())&&
-											c2.getName().substring(c2.getName().lastIndexOf(' '),c2.getName().length()-1).toUpperCase().contains(c1.getName().substring(c1.getName().lastIndexOf(' '),c1.getName().length()-1).toUpperCase())&&c1.getCommittee().equals(c2.getCommittee())){ //checks if the c2 object's name contains the c1 object's name in it
-										abundant = true;
-										possibilities++;
-										candidate = c2;
-									}
-								}
-							}
-							
-						}
-					}
-					if(abundant == true && possibilities == 1){ //runs if abundant is set to true and possibilities is set to 1
-						noMatches = false; //sets noMatches to false
-						candidate.addVotes(c1.getVotes()); //adds votes from the c1 object to the candidate object's vote variable
-						candidates.remove(c1); //removes the c1 object
-					}
-				}
-			}while(noMatches == false); //do...while loop that runs as long as noMatches is false
+			mergeCandidates(candidates);
 			//compares first names some might be nick names
 			compareNames(candidates);
 		}
@@ -229,6 +179,62 @@ public class Controller {
 		if(c1.getName().contains(s) && !(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2))
 			return true;
 		return false;
+	}
+	
+	public void mergeCandidates(ArrayList<Candidate> candidates) {
+		boolean noMatches = false; //a boolean variable to check if there's anymore matches
+		do {
+			
+			noMatches = true; //sets the variable to true
+			for(int i = 0; i < candidates.size(); i++){ //runs at the same amount as the size of the arraylist
+				boolean abundant = false;
+				int possibilities = 0; //an int variable to record the number of possible matches
+				Candidate c1 = candidates.get(i), candidate = new Candidate("",""); //2 candidate objects
+
+				if(c1.getName().contains(" ")){
+					if(c1.getName().contains(".") || c1.getName().indexOf(" ") == 1 || c1.getName().indexOf(" ") == c1.getName().length() - 2){ //checks if there's an initial in the name
+						for(Candidate c2: candidates){
+							if(!c1.getName().equalsIgnoreCase(c2.getName()) && isInitials(c2, " ")&&(c1.getCommittee().equals(c2.getCommittee()))){ //checks if both names aren't the same and if there's an initial
+								if(compareNames(c1, c2)){ //compares both objects based on their names
+									abundant = true;
+									possibilities++; //adds 1 to the possibilities variable
+									candidate = c2; //sets the candidate object to the c2 object
+
+								}
+							}
+						}
+					}
+				}
+				else {
+					for(Candidate c2: candidates){
+						if(!c1.getName().equalsIgnoreCase(c2.getName()) && !isInitials(c2,".")){
+							if(c1.getName().contains(".")){ //checks if there's a period
+								if(c2.getName().contains(" ") && c1.getName().substring(0, 1).equalsIgnoreCase(c2.getName().substring(0, 1)) &&(c1.getCommittee().equals(c2.getCommittee())&&
+										c1.getName().substring(c1.getName().indexOf(".") + 1, c1.getName().indexOf(".") + 2).equalsIgnoreCase(c2.getName().substring(c2.getName().indexOf(" ") + 1, c2.getName().indexOf(" ") + 2)))){ //checks if there's any initials
+									abundant = true;
+									possibilities++;
+									candidate = c2;
+								}
+							}
+							else{
+								if(((c2.getName().substring(0,c2.getName().indexOf(' ')).toUpperCase().contains(c1.getName().substring(0,c1.getName().indexOf(' ')).toUpperCase())&&
+										c2.getName().substring(c2.getName().lastIndexOf(' '),c2.getName().length()-1).toUpperCase().contains(c1.getName().substring(c1.getName().lastIndexOf(' '),c1.getName().length()-1).toUpperCase())))&&c1.getCommittee().equals(c2.getCommittee())){ //checks if the c2 object's name contains the c1 object's name in it
+									abundant = true;
+									possibilities++;
+									candidate = c2;
+								}
+							}
+						}
+						
+					}
+				}
+				if(abundant == true && possibilities == 1){ //runs if abundant is set to true and possibilities is set to 1
+					noMatches = false; //sets noMatches to false
+					candidate.addVotes(c1.getVotes()); //adds votes from the c1 object to the candidate object's vote variable
+					candidates.remove(c1); //removes the c1 object
+				}
+			}
+		}while(noMatches == false);
 	}
 	
 	public String trimSufixAndPrefix(String name) {
@@ -273,7 +279,12 @@ public class Controller {
 			Candidate c1=candidates.get(i);
 			for(Candidate c2: candidates){
 				String[] s2=c2.getName().split(" ");
-				if((s1[0].contains(s2[0])||s2[0].contains(s1[0]))&&!s1[0].equalsIgnoreCase(s2[0])&&(c1.getCommittee().equals(c2.getCommittee()))) {
+				if(((s1[0].contains(s2[0])||s2[0].contains(s1[0]))&&
+						(s1[s1.length-1].contains(s2[s2.length-1])||s2[s2.length-1].contains(s1[s1.length-1]))&&
+						!s1[0].equalsIgnoreCase(s2[0])&&(c1.getCommittee().equals(c2.getCommittee())))) {
+					if(candidates.size()==1) {
+						break;
+					}
 					candidates.get(i).addVotes(c2.getVotes()); //adds votes from the c1 object to the candidate object's vote variable
 					candidates.remove(c2);
 					i--;
